@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.task.mapper.TaskMapper">
+
+	<resultMap id="TaskResultMap" type="hashMap">
+		<result javaType="java.lang.Integer" column="id" property="id"></result>
+		<result javaType="java.lang.String" column="content"
+			property="content"></result>
+		<result javaType="java.lang.String" column="insert_date"
+			property="insert_date"></result>
+		<result javaType="java.lang.String" column="elapse"
+			property="elapse"></result>
+		<result javaType="java.lang.String" column="color"
+			property="color"></result>
+	</resultMap>
+
+	<select id="select" parameterType="hashmap"
+		resultMap="TaskResultMap">
+		SELECT 
+			ID, 
+			CONTENT, 
+			DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE,
+			(CASE DATEDIFF(NOW(), DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i'))
+        		WHEN 0 THEN '오늘'
+       			ELSE CONCAT(DATEDIFF(NOW(), DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i')), '일전')
+       		 END) AS ELAPSE,
+       		(CASE DATEDIFF(NOW(), DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i'))
+	            WHEN 0 THEN 'badge-primary'
+	            WHEN 1 THEN 'badge-success'
+	            WHEN 2 THEN 'badge-success'
+	            WHEN 3 THEN 'badge-info'
+	            WHEN 4 THEN 'badge-info'
+	            WHEN 5 THEN 'badge-warning'
+	            WHEN 6 THEN 'badge-warning'
+	            WHEN 7 THEN 'badge-warning'
+	            ELSE 'badge-danger'
+	         END) AS COLOR
+		FROM TDL_TASK
+		<where>
+			<if test="id != null">ID = #{id}</if>
+			<if test="content != null">AND CONTENT LIKE #{content}</if>
+		</where>
+		ORDER BY INSERT_DATE
+	</select>
+
+	<insert id="insert" parameterType="hashmap" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO TDL_TASK (CONTENT, INSERT_DATE)
+		VALUES (#{content}, DATE_FORMAT(now(), '%Y%m%d%H%i%s'))
+	</insert>
+
+	<update id="update" parameterType="hashmap">
+		UPDATE TDL_TASK
+		<set>
+			<if test="content != null">CONTENT = #{content},</if>
+			<if test="true">INSERT_DATE = DATE_FORMAT(now(), '%Y%m%d%H%i%s')</if>
+		</set>		
+		WHERE ID = #{id}
+	</update>
+
+	<delete id="delete" parameterType="hashmap">
+		DELETE FROM TDL_TASK
+		WHERE ID = #{id}	
+	</delete>
+
+</mapper>
